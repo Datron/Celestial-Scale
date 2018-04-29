@@ -12,6 +12,10 @@ SmallMagellanicCloud,MilkyWay,IC1101,BootesVoid,Universe};
 static int window,menu_id,go_to_submenu_id,music_submenu_id,rotate_submenu_id,background_submenu_id,translate_submenu_id;
 // menu choice variable
 int choice=-1;
+// how much to move by when 'z' or 'x' key is pressed
+int movement=-500;
+// how much to zoom out to display the new object
+int zoom;
 void menu(int num){
     if(num == 13){
         glutDestroyWindow(window);
@@ -54,9 +58,9 @@ void display(){
     glLoadIdentity();
     glOrtho(-1000,1000,-1000,1000,-1000,1000);
     glColor3f(1.0,0.0,0.0);
-    glTranslatef(-500,0,-1);
+    glTranslatef(movement,0,-1);
     glutSolidSphere(200, 60, 60);
-    glTranslatef(500,0,-200);
+    glTranslatef(movement+500,0,-200);
     glColor3f(0.0,0.6,0.7);
     glutSolidSphere(200, 60, 60);
     glutSwapBuffers();
@@ -71,14 +75,30 @@ void reshape(int x, int y)
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,x,y);  //Use the whole window for rendering
 }
+void viewNext(int x,int y,int z){
+    glTranslated(x,y,z);
+    printf("%d %d %d\n",x,y,z);
+}
+void myKeyboard(unsigned char key,int x,int y){
+    switch(key){
+        case 'z':
+            movement-=100;
+            break;
+        case 'x':
+            movement+=100;
+            break;
+    }
+    glutPostRedisplay();
+}
 int main(int argc,char** argv){
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB|GLUT_DEPTH);
     glutInitWindowSize(1000,1000);
     glutCreateWindow("Scale of the Universe");
     // glutFullScreen();
-	glutDisplayFunc(display);
     createMenu();
+	glutDisplayFunc(display);
+    glutKeyboardFunc(myKeyboard);
 	glEnable(GL_DEPTH_TEST);
     glutMainLoop();
 }
