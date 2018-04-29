@@ -2,11 +2,52 @@
 #include<string>
 #include<GL/glut.h>
 
+// all celestial objects to be rendered
+enum Celestial{
+Ceres,Moon,Callisto,Mercury,Mars,Venus,Earth,Kepler22b,Neptune,Uranus,Saturn,Jupiter
+,ProximaCentauri,Sun,SiriusA,Vega,Arcturus,Rigel,Betelgeuse,VYCanisMajoris,UYScuti,NGC1277,TON618,CatsEyeNebula,
+HelixNebula,OrionNebula,OmegaCentauri,
+SmallMagellanicCloud,MilkyWay,IC1101,BootesVoid,Universe};
+// window and menu id variables
+static int window,menu_id,go_to_submenu_id,music_submenu_id,rotate_submenu_id,background_submenu_id,translate_submenu_id;
+// menu choice variable
+int choice=-1;
+void menu(int num){
+    if(num == 13){
+        glutDestroyWindow(window);
+        exit(0);
+    }
+    else
+        choice = num;
+}
+void createMenu(){
+    go_to_submenu_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Ceres",1);
+    glutAddMenuEntry("Moon",2);
+    glutAddMenuEntry("Callisto",3);
+    glutAddMenuEntry("Mercury",4);
+    glutAddMenuEntry("Mars",5);
+    music_submenu_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Track 1",7);
+    glutAddMenuEntry("Track 2",8);
+    rotate_submenu_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Enable",11);
+    glutAddMenuEntry("Disable",12);
+    menu_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Start",0);
+    glutAddSubMenu("Go to...",go_to_submenu_id);
+    glutAddMenuEntry("Animate",6);
+    glutAddSubMenu("Music",music_submenu_id);
+    glutAddMenuEntry("Background",9);
+    glutAddMenuEntry("Shading",10);
+    glutAddSubMenu("Rotation",rotate_submenu_id);
+    glutAddMenuEntry("Quit",13);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
 void universe_init(){
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0,1.0,1.0,1.0);
 }
-
 void display(){
     glMatrixMode(GL_MODELVIEW);
     universe_init();
@@ -37,8 +78,7 @@ int main(int argc,char** argv){
     glutCreateWindow("Scale of the Universe");
     // glutFullScreen();
 	glutDisplayFunc(display);
-    // glutReshapeFunc(reshape);
-	// glutIdleFunc(display);
+    createMenu();
 	glEnable(GL_DEPTH_TEST);
     glutMainLoop();
 }
