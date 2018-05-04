@@ -9,11 +9,13 @@ Ceres,Moon,Callisto,Mercury,Mars,Venus,Earth,Kepler22b,Neptune,Uranus,Saturn,Jup
 HelixNebula,OrionNebula,OmegaCentauri,
 SmallMagellanicCloud,MilkyWay,IC1101,BootesVoid,Universe};
 // window and menu id variables
+double planet_size[] = {950.0,3500.0,4800.0,4900.0,6800.0,12000.0,13000.0,30000.0,50000.0,51000.0,
+120000.0,140000.0,200000.0,1400000.0,2500000.0,3800000.0,36000000.0,97000000.0,1300000000.0};
 static int window,menu_id,go_to_submenu_id,music_submenu_id,rotate_submenu_id,background_submenu_id,translate_submenu_id;
 // menu choice variable
 int choice=-1;
 // how much to move by when 'z' or 'x' key is pressed
-int movement=-500;
+int movement=0;
 // how much to zoom out to display the new object
 int zoom;
 void menu(int num){
