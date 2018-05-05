@@ -1,16 +1,8 @@
 #include<iostream>
 #include<string>
 #include<GL/glut.h>
-
-// all celestial objects to be rendered
-enum Celestial{
-Ceres,Moon,Callisto,Mercury,Mars,Venus,Earth,Kepler22b,Neptune,Uranus,Saturn,Jupiter
-,ProximaCentauri,Sun,SiriusA,Vega,Arcturus,Rigel,Betelgeuse,VYCanisMajoris,UYScuti,NGC1277,TON618,CatsEyeNebula,
-HelixNebula,OrionNebula,OmegaCentauri,
-SmallMagellanicCloud,MilkyWay,IC1101,BootesVoid,Universe};
-// window and menu id variables
-double planet_size[] = {950.0,3500.0,4800.0,4900.0,6800.0,12000.0,13000.0,30000.0,50000.0,51000.0,
-120000.0,140000.0,200000.0,1400000.0,2500000.0,3800000.0,36000000.0,97000000.0,1300000000.0};
+#include<sqlite3.h>
+using namespace std;
 static int window,menu_id,go_to_submenu_id,music_submenu_id,rotate_submenu_id,background_submenu_id,translate_submenu_id;
 // menu choice variable
 int choice=-1;
@@ -18,6 +10,13 @@ int choice=-1;
 int movement=0;
 // how much to zoom out to display the new object
 int zoom;
+static int callback(void *data,int argc,char** argv,char** azColName){
+    int i;
+    cout << data <<endl;
+    for(i=0;i<3;i++)
+        cout << azColName[i] << ":" << argv[i] << endl;
+    return 0;
+}
 void menu(int num){
     if(num == 13){
         glutDestroyWindow(window);
@@ -93,6 +92,20 @@ void myKeyboard(unsigned char key,int x,int y){
     glutPostRedisplay();
 }
 int main(int argc,char** argv){
+    sqlite3 *db;
+    char *error = nullptr;
+    int rc;
+    rc = sqlite3_open("planets.db",&db);
+    if(rc){
+        fprintf(stderr,"Cannot open database: %s\n",sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return 1;
+    }
+    rc = sqlite3_exec(db,"SELECT * FROM Planets",callback,0,&error);
+    if(rc!=SQLITE_OK){
+        fprintf(stderr,"Error:%s\n",error);
+        sqlite3_free(error);
+    }
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB|GLUT_DEPTH);
     glutInitWindowSize(1000,1000);
@@ -103,4 +116,5 @@ int main(int argc,char** argv){
     glutKeyboardFunc(myKeyboard);
 	glEnable(GL_DEPTH_TEST);
     glutMainLoop();
+    sqlite3_close(db);
 }
