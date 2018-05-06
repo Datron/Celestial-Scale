@@ -4,36 +4,45 @@
 #include<sqlite3.h>
 #include "Planet.h"
 using namespace std;
+
 static int window,menu_id,go_to_submenu_id,music_submenu_id,rotate_submenu_id,background_submenu_id,translate_submenu_id;
 // menu choice variable
 int choice=-1;
-// how much to move by when 'z' or 'x' key is pressed
-int movement=0;
+// variable that manages the current planet being viewed
+int cview = 0;
+// how much to move by when 'z' or 'x' key is pressed using glOrtho
+double nmov=-100,fmov=100,topmov=-100,botmov=100,leftmov=-100,rightmov=100;
 // a variable to decide distance between planets
-double pos=-0.0;
+double pos=0.0;
 // how much to zoom out to display the new object
 int zoom;
 // db variables
 sqlite3 *db;
 char *error = nullptr;
 int rc;
-Planet celestial[33];
+// 
+Planet* celestial[33];
 int celes_count=0;
 static int callback(void *data,int argc,char** argv,char** azColName){
     int i;
     cout << data <<endl;
     for(i=0;i<3;i+=3){
-        celestial[celes_count++] = Planet(argv[i],atof(argv[i+1])/1000,argv[i+2],"|","|","|");
+        celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/1000,argv[i+2],"|","|","|");
     }
     return 0;
 }
 void menu(int num){
+    int i;
     if(num == 13){
         glutDestroyWindow(window);
+        sqlite3_close(db);
+        for(i=0;i<celes_count;i++)
+            delete celestial[i];
         exit(0);
     }
     else
         choice = num;
+    glutPostRedisplay();
 }
 void createMenu(){
     go_to_submenu_id = glutCreateMenu(menu);
@@ -65,20 +74,44 @@ void universe_init(){
 }
 void display(){
     int i;
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glOrtho(-1000,1000,-1000,1000,-1000,1000);
-    glColor3f(1.0,0.0,0.0);
-    for(i=0;i<celes_count;i++){
-        celestial[i].render(pos,0.0,0.0);
-        pos += celestial[i].getRadius();
+    switch(choice){
+        case 0:
+            // glColor3f(1.0,0.0,0.0);
+            universe_init();
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            printf("cview = %d %f %f %f %f %f %f\n\n",cview,nmov,fmov,topmov,botmov,leftmov,rightmov);
+            glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
+            for(i=0;i<celes_count;i++){
+                celestial[i]->render(pos,0.0,0.0);
+                pos += celestial[i]->getRadius()+celestial[i]->getRadius()*1.5;
+            }
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        case 6:
+            break;
+        case 7:
+            break;
+        case 8:
+            break;
+        case 9:
+            break;
+        case 10:
+            break;
+        case 11:
+            break;
+        case 12:
+            break;
     }
-    // glColor3f(1.0,0.0,0.0);
-    // glTranslatef(movement,0,-1);
-    // glutSolidSphere(200, 60, 60);
-    // glTranslatef(movement+500,0,-200);
-    // glColor3f(0.0,0.6,0.7);
-    // glutSolidSphere(200, 60, 60);
     glutSwapBuffers();
     glFlush();
 }
@@ -90,21 +123,35 @@ void reshape(int x, int y){
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,x,y);  //Use the whole window for rendering
 }
-void viewNext(int x,int y,int z){
-    glTranslated(x,y,z);
-    printf("%d %d %d\n",x,y,z);
+void updateScreen(){
+    glutPostRedisplay();
 }
 void myKeyboard(unsigned char key,int x,int y){
     switch(key){
         case 'z':
-            movement-=100;
-            viewNext(movement,0.0,0.0);
+            if(cview!=0)
+                cview--;
+            nmov *= 2;
+            fmov *= 2;
+            topmov *= 2;
+            botmov *= 2;
+            leftmov *= 2;
+            rightmov *= 2;
+            
             break;
         case 'x':
-            movement+=100;
-            viewNext(movement,0.0,0.0);
+            if(cview < 33)
+                cview++;
+            nmov /= 2;
+            fmov /= 2;
+            topmov /= 2;
+            botmov /= 2;
+            leftmov /= 2;
+            rightmov /= 2;
+            // viewNext();
             break;
     }
+    glutPostRedisplay();
 }
 int main(int argc,char** argv){
     rc = sqlite3_open("planets.db",&db);
@@ -122,12 +169,11 @@ int main(int argc,char** argv){
     glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB|GLUT_DEPTH);
     glutInitWindowSize(1000,1000);
     glutCreateWindow("Scale of the Universe");
-    universe_init();
     // glutFullScreen();
     createMenu();
 	glutDisplayFunc(display);
     glutKeyboardFunc(myKeyboard);
+    // glutIdleFunc(display);
 	glEnable(GL_DEPTH_TEST);
     glutMainLoop();
-    sqlite3_close(db);
 }
