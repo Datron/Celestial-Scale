@@ -27,7 +27,7 @@ static int callback(void *data,int argc,char** argv,char** azColName){
     int i;
     cout << data <<endl;
     for(i=0;i<3;i+=3){
-        celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/1000,argv[i+2],"|","|","|");
+        celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/100000,argv[i+2],"|","|","|");
     }
     return 0;
 }
@@ -80,7 +80,7 @@ void display(){
             universe_init();
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
-            printf("cview = %d %f %f %f %f %f %f\n\n",cview,nmov,fmov,topmov,botmov,leftmov,rightmov);
+            printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
             glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
             for(i=0;i<celes_count;i++){
                 celestial[i]->render(pos,0.0,0.0);
@@ -151,6 +151,7 @@ void myKeyboard(unsigned char key,int x,int y){
             // viewNext();
             break;
     }
+    pos = 0;
     glutPostRedisplay();
 }
 int main(int argc,char** argv){
