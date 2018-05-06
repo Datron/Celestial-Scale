@@ -1,5 +1,7 @@
 CXX = g++
-CXXFLAGS = -g -lsqlite3 -lGL -lGLU -lglut
+CXXFLAGS = -g -lGL -lGLU -lglut -lsqlite3
+# SQLFLAGS = -lsqlite3
+journey: main.cpp Planet.o
+	$(CXX) -o journey main.cpp Planet.o $(CXXFLAGS)
 
-journey: main.cpp
-	$(CXX) -o journey main.cpp $(CXXFLAGS)
+Planet.o: Planet.h
