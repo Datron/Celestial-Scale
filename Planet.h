@@ -4,14 +4,15 @@ class Planet {
     public:
         Planet();
         Planet(string name,double radius,string units,string facts,string description,string texLoc);
-        void render(double,double,double);
+        void render(double,double,double,GLuint id);
         double getRadius();
         string getUnit();
         void setSecondaryTextPrimitives(double,double,double);
         ~Planet();
     private:
         void loadTexture();
-        string name,facts,description,units,texLoc;
+        string name,facts,description,units;
+        string texLoc;
         double radius;
         double scaling_factor;
 };

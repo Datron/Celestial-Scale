@@ -27,7 +27,7 @@ static int callback(void *data,int argc,char** argv,char** azColName){
     int i;
     cout << data <<endl;
     for(i=0;i<3;i+=3){
-        celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/100000,argv[i+2],"|","|","|");
+        celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/100000,argv[i+2],"|","|","bmp/earth.jpg");
     }
     return 0;
 }
@@ -83,8 +83,8 @@ void display(){
             printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
             glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
             for(i=0;i<celes_count;i++){
-                celestial[i]->render(pos,0.0,0.0);
-                pos += celestial[i]->getRadius()+celestial[i]->getRadius()*1.5;
+                celestial[i]->render(pos,0.0,0.0,i);
+                pos += celestial[i]->getRadius()+celestial[i]->getRadius()*2;
             }
             break;
         case 1:
