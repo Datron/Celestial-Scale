@@ -18,6 +18,12 @@ void Planet::render(double x,double y,double z){
 double Planet::getRadius(){
     return this->radius;
 }
+string Planet::getUnit(){
+    return this->units;
+}
+string Planet::getTexLoc(){
+    return "bmp/"+this->texLoc;
+}
 Planet::~Planet(){
     cout << this->name << "\t\t" << this-> radius << "\t\t" << this->units << "\t\t" << this->facts << "\t\t" << this->texLoc <<endl;
 }

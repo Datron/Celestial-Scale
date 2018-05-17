@@ -7,6 +7,7 @@ class Planet {
         void render(double,double,double);
         double getRadius();
         string getUnit();
+        string getTexLoc();
         void setSecondaryTextPrimitives(double,double,double);
         ~Planet();
     private:

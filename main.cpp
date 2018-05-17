@@ -28,9 +28,9 @@ GLuint texture[33];
 int celes_count=0;
 static int callback(void *data,int argc,char** argv,char** azColName){
     int i;
-    cout << data <<endl;
-    for(i=0;i<3;i+=3){
-        celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/10000,argv[i+2],"|","|","bmp/earthmap.bmp");
+    for(i=0;i<6;i+=6){
+            // cout << argv[i+6] << endl;
+            celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/10000,argv[i+2],"|","|",argv[i+6]);
     }
     return 0;
 }
@@ -97,7 +97,8 @@ void display(){
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
                 // set the texture wrapping/filtering options (on the currently bound texture object)
                 // load and generate the texture
-                unsigned char *data = stbi_load("bmp/earthmap.bmp", &w, &h, &comp, STBI_rgb_alpha);
+                string texMap = celestial[i]->getTexLoc();
+                unsigned char *data = stbi_load(texMap.c_str(), &w, &h, &comp, STBI_rgb_alpha);
                 if (data)
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
                 else
