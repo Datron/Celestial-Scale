@@ -11,7 +11,7 @@ Planet::Planet(string name,double radius,string units,string facts,string descri
     this->facts = facts; this->description = description; this->texLoc = texLoc;
 }
 void Planet::render(double x,double y,double z){
-    glTranslated(x,y,z);
+    glTranslated(x+2,y,z);
     // glTranslated(0.0,this->radius,0.0);
     glutSolidSphere(this->radius,80,80);
 }

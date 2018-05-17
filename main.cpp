@@ -13,7 +13,7 @@ int choice=-1;
 // variable that manages the current planet being viewed
 int cview = 0;
 // how much to move by when 'z' or 'x' key is pressed using glOrtho
-double nmov=-1,fmov=1,topmov=-1,botmov=1,leftmov=-1,rightmov=1;
+double nmov=-10,fmov=10,topmov=-10,botmov=10,leftmov=-10,rightmov=10;
 // a variable to decide distance between planets
 double pos=0.0;
 // how much to zoom out to display the new object
@@ -30,7 +30,7 @@ static int callback(void *data,int argc,char** argv,char** azColName){
     int i;
     for(i=0;i<6;i+=6){
             // cout << argv[i+6] << endl;
-            celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/10000,argv[i+2],"|","|",argv[i+6]);
+            celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/100,argv[i+2],"|","|",argv[i+6]);
     }
     return 0;
 }
@@ -104,8 +104,9 @@ void display(){
                 else
                     cout << "Failed to load texture" << endl;
                 stbi_image_free(data);
+                pos = celestial[i]->getRadius()*2.1;
                 celestial[i]->render(pos,0.0,0.0);
-                pos += celestial[i]->getRadius()+celestial[i]->getRadius()*2;
+                
             }
             glDisable(GL_TEXTURE_2D);
             break;
@@ -151,26 +152,30 @@ void updateScreen(){
 void myKeyboard(unsigned char key,int x,int y){
     switch(key){
         case 'z':
-            if(cview!=0)
-                cview--;
-            nmov *= 2;
-            fmov *= 2;
-            topmov *= 2;
-            botmov *= 2;
-            leftmov *= 2;
-            rightmov *= 2;
-            
+            if(cview < celes_count-1)
+                cview++;
+            cout << celestial[cview]->getRadius() <<endl;
+            if(nmov < celestial[cview]->getRadius()){
+                nmov *= 2;
+                fmov *= 2;
+                topmov *= 2;
+                botmov *= 2;
+                leftmov *= 2;
+                rightmov *= 2;
+            }
+            glTranslated(celestial[cview]->getRadius(),0.0,0.0);
             break;
         case 'x':
-            if(cview < 33)
-                cview++;
+            if(cview != 0)
+                cview--;
+            cout << celestial[cview]->getRadius() <<endl;
             nmov /= 2;
             fmov /= 2;
             topmov /= 2;
             botmov /= 2;
             leftmov /= 2;
             rightmov /= 2;
-            // viewNext();
+            //glTranslated(rightmov,0.0,0.0);
             break;
     }
     pos = 0;
