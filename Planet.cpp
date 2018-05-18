@@ -11,6 +11,8 @@ Planet::Planet(string name,double radius,string units,string facts,string descri
     this->facts = facts; this->description = description; this->texLoc = texLoc;
 }
 void Planet::render(double x,double y,double z){
+    GLfloat diffusecoef[] = {1.0,1.0,1.0,1.0};
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,diffusecoef);
     glTranslated(x+2,y,z);
     // glTranslated(0.0,this->radius,0.0);
     glutSolidSphere(this->radius,80,80);

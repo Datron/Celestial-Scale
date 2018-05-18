@@ -12,8 +12,17 @@ static int window,menu_id,go_to_submenu_id,music_submenu_id,rotate_submenu_id,ba
 int choice=-1;
 // variable that manages the current planet being viewed
 int cview = 0;
+// lighting parameters
+GLfloat lightpos[] = {0.0,0.0,1.0,0.0};
+GLfloat lightam[] = {1.0,1.0,1.0,1.0};
+GLfloat lightdif[] = {1.0,1.0,1.0,1.0};
 // how much to move by when 'z' or 'x' key is pressed using glOrtho
-double nmov=-10,fmov=10,topmov=-10,botmov=10,leftmov=-10,rightmov=10;
+double nmov = -1,
+        fmov = 1,
+     topmov = -1,
+     botmov =  1,
+     leftmov= -1,
+     rightmov= 1;
 // a variable to decide distance between planets
 double pos=0.0;
 // how much to zoom out to display the new object
@@ -22,7 +31,6 @@ int zoom;
 sqlite3 *db;
 char *error = nullptr;
 int rc;
-// 
 Planet* celestial[33];
 GLuint texture[33];
 int celes_count=0;
@@ -69,7 +77,7 @@ void createMenu(){
 }
 void universe_init(){
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glClearColor(1.0,1.0,1.0,1.0);
+    glClearColor(0.0,0.0,0.0,1.0);
 }
 void display(){
     int i;
@@ -89,7 +97,6 @@ void display(){
             glEnable(GL_TEXTURE_GEN_T);
             for(i=0;i<celes_count;i++){
                 glBindTexture(GL_TEXTURE_2D, texture[i]);
-                cout << texture[i] << endl;
                 glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -104,7 +111,10 @@ void display(){
                 else
                     cout << "Failed to load texture" << endl;
                 stbi_image_free(data);
-                pos = celestial[i]->getRadius()*2.1;
+                if(i!=0)
+                    pos = celestial[i]->getRadius()*2.1;
+                // gluLookAt(pos,0.0,-1.0,nmov,0.0,0.0,1.0,0.0,0.0);
+                // gluLookAt(pos,0.0,-1.0,pos,0.0,0.0,0.0,0.0,0.0);
                 celestial[i]->render(pos,0.0,0.0);
                 
             }
@@ -199,8 +209,13 @@ int main(int argc,char** argv){
     glutCreateWindow("Scale of the Universe");
     // glutFullScreen();
     glGenTextures(33,texture);
+    glLightfv(GL_LIGHT0,GL_POSITION,lightpos);
+    glLightfv(GL_LIGHT0,GL_AMBIENT,lightam);
+    glLightfv(GL_LIGHT0,GL_DIFFUSE,lightdif);
     createMenu();
 	glutDisplayFunc(display);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
     glutKeyboardFunc(myKeyboard);
     // glutIdleFunc(display);
 	glEnable(GL_DEPTH_TEST);
