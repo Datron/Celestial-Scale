@@ -34,6 +34,32 @@ int rc;
 Planet* celestial[33];
 GLuint texture[33];
 int celes_count=0;
+
+void front(){
+    glClear(GL_COLOR_BUFFER_BIT);
+    glPushMatrix();
+    glClearColor(0.0,0.0,0.0,1.0);
+    glColor3f(0.6,0.6,0);
+    strokeString(270,600,0.18,0.18,"BANGALORE INSTITUTE OF TECHNOLOGY",2);
+    glColor3f(1,0,0);
+    strokeString(130,550,0.3,0.3,"DEPARTMENT OF COMPUTER SCIENCE",4);
+    strokeString(330,670,0.3,0.3,"AND ENGINEERING",4);
+    strokeString(200,500,0.3,0.3,"AN OPENGL MINI PROJECT ON",2);
+    glColor3f(0,0.5,1);
+    strokeString(90,420,0.43,0.4,"BubbleSort Algorithm Simulation ",6);
+    glColor3f(0,0.5,0);
+    strokeString(350,240,0.15,0.15,"Press Enter to continue.......",2);
+    glColor3f(0,0.5,1);
+    strokeString(50,120,0.18,0.18,"K K NITHIN",2);
+    strokeString(50,80,0.18,0.18,"1BI15CS066",2);
+    strokeString(750,120,0.2,0.2,"Prof K.J.Banushree",2);
+    strokeString(750,80,0.2,0.2,"Prof M.Kempanna",2);
+    strokeString(750,40,0.2,0.2,"Prof Prathima.M.G",2);
+    glColor3f(1,0,0);
+    strokeString(50,160,0.15,0.15,"By:",2);
+    strokeString(750,160,0.15,0.15,"Under the guidance of ",2);
+    glPopMatrix();
+}
 static int callback(void *data,int argc,char** argv,char** azColName){
     int i;
     for(i=0;i<6;i+=6){
