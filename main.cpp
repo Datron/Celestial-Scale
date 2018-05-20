@@ -34,26 +34,36 @@ int rc;
 Planet* celestial[33];
 GLuint texture[33];
 int celes_count=0;
-
-void front(){
-    glClear(GL_COLOR_BUFFER_BIT);
+void strokeString(float x,float y,float sx,float sy,string string,int width){
+    const char *c = string.c_str();
+    int i=0;
+    glLineWidth(width);
     glPushMatrix();
-    glClearColor(0.0,0.0,0.0,1.0);
+    glTranslatef(x,y,0);
+    glScalef(sx,sy,0);
+    for (i=0; c[i] != '\0'; i++)
+         glutStrokeCharacter(GLUT_STROKE_ROMAN, c[i]);
+    glPopMatrix();
+}
+void front(){
+    glPushMatrix();
+    gluOrtho2D(0,1000,-100,1000);
+    glClearColor(1.0,1.0,1.0,1.0);
     glColor3f(0.6,0.6,0);
     strokeString(270,600,0.18,0.18,"BANGALORE INSTITUTE OF TECHNOLOGY",2);
     glColor3f(1,0,0);
     strokeString(130,550,0.3,0.3,"DEPARTMENT OF COMPUTER SCIENCE",4);
-    strokeString(330,670,0.3,0.3,"AND ENGINEERING",4);
-    strokeString(200,500,0.3,0.3,"AN OPENGL MINI PROJECT ON",2);
+    strokeString(330,500,0.3,0.3,"AND ENGINEERING",4);
+    strokeString(200,450,0.3,0.3,"AN OPENGL MINI PROJECT ON",2);
     glColor3f(0,0.5,1);
-    strokeString(90,420,0.43,0.4,"BubbleSort Algorithm Simulation ",6);
+    strokeString(200,400,0.43,0.4,"Scale of The Universe",6);
     glColor3f(0,0.5,0);
-    strokeString(350,240,0.15,0.15,"Press Enter to continue.......",2);
+    strokeString(350,240,0.15,0.15,"Select start to continue",2);
     glColor3f(0,0.5,1);
-    strokeString(50,120,0.18,0.18,"K K NITHIN",2);
-    strokeString(50,80,0.18,0.18,"1BI15CS066",2);
+    strokeString(50,120,0.18,0.18,"Kartik G",2);
+    strokeString(50,80,0.18,0.18,"1BI15CS068",2);
     strokeString(750,120,0.2,0.2,"Prof K.J.Banushree",2);
-    strokeString(750,80,0.2,0.2,"Prof M.Kempanna",2);
+    strokeString(750,80,0.2,0.2,"Dr M.Kempanna",2);
     strokeString(750,40,0.2,0.2,"Prof Prathima.M.G",2);
     glColor3f(1,0,0);
     strokeString(50,160,0.15,0.15,"By:",2);
@@ -106,13 +116,15 @@ void universe_init(){
     glClearColor(0.0,0.0,0.0,1.0);
 }
 void display(){
+    universe_init();
+    if(choice == -1)
+        front();
     int i;
     int w;
     int h;
     int comp;
     switch(choice){
         case 0:
-            universe_init();
             // glColor3f(1.0,0.0,0.0);
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
@@ -233,7 +245,7 @@ int main(int argc,char** argv){
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
     glutInitWindowSize(1000,1000);
     glutCreateWindow("Scale of the Universe");
-    // glutFullScreen();
+    //glutFullScreen(); // don't enable this.
     glGenTextures(33,texture);
     glLightfv(GL_LIGHT0,GL_POSITION,lightpos);
     glLightfv(GL_LIGHT0,GL_AMBIENT,lightam);
