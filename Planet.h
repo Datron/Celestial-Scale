@@ -8,6 +8,9 @@ class Planet {
         double getRadius();
         string getUnit();
         string getTexLoc();
+        string getName();
+        string getFacts();
+        string getDescription();
         void setSecondaryTextPrimitives(double,double,double);
         ~Planet();
     private:

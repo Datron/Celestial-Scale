@@ -1,12 +1,14 @@
 #include<iostream>
 #include<string>
+#include<math.h>
 #include<GL/glut.h>
 #include<sqlite3.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #include "Planet.h"
 using namespace std;
-
+// background colors
+double bgr = 0.0,bgg = 0.0,bgb = 0.0;
 static int window,menu_id,go_to_submenu_id,music_submenu_id,rotate_submenu_id,background_submenu_id,translate_submenu_id;
 // menu choice variable
 int choice=-1;
@@ -17,14 +19,14 @@ GLfloat lightpos[] = {0.0,0.0,1.0,0.0};
 GLfloat lightam[] = {1.0,1.0,1.0,1.0};
 GLfloat lightdif[] = {1.0,1.0,1.0,1.0};
 // how much to move by when 'z' or 'x' key is pressed using glOrtho
-double nmov = -1,
-        fmov = 1,
-     topmov = -1,
-     botmov =  1,
-     leftmov= -1,
-     rightmov= 1;
+double nmov = -32,
+        fmov = 32,
+     topmov = -32,
+     botmov =  32,
+     leftmov= -32,
+     rightmov= 32;
 // a variable to decide distance between planets
-double pos=0.0;
+double pos=0.0,posy = 0.0;
 // how much to zoom out to display the new object
 int zoom;
 // db variables
@@ -34,6 +36,8 @@ int rc;
 Planet* celestial[33];
 GLuint texture[33];
 int celes_count=0;
+
+// program starts here
 void strokeString(float x,float y,float sx,float sy,string string,int width){
     const char *c = string.c_str();
     int i=0;
@@ -104,16 +108,20 @@ void createMenu(){
     menu_id = glutCreateMenu(menu);
     glutAddMenuEntry("Start",0);
     glutAddSubMenu("Go to...",go_to_submenu_id);
-    glutAddMenuEntry("Animate",6);
     glutAddMenuEntry("Background",9);
-    glutAddMenuEntry("Shading",10);
+    glutAddMenuEntry("Lighting",10);
     glutAddSubMenu("Rotation",rotate_submenu_id);
     glutAddMenuEntry("Quit",13);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 void universe_init(){
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.0,0.0,0.0,1.0);
+    glClearColor(bgr,bgg,bgb,1.0);
+    glLightfv(GL_LIGHT0,GL_POSITION,lightpos);
+    glLightfv(GL_LIGHT0,GL_AMBIENT,lightam);
+    glLightfv(GL_LIGHT0,GL_DIFFUSE,lightdif);
+    glEnable(GL_LIGHT0);
+    glShadeModel(GL_SMOOTH);
 }
 void display(){
     universe_init();
@@ -130,10 +138,16 @@ void display(){
             glLoadIdentity();
             printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
             glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_TEXTURE_GEN_S);
-            glEnable(GL_TEXTURE_GEN_T);
+            strokeString(pos-(cview+1)*5,botmov/3,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
+            strokeString(pos-(cview+1)*5,topmov/2,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
             for(i=0;i<celes_count;i++){
+                if(i!=0) 
+                    pos = celestial[i]->getRadius()*2.1;
+                    // celestial[i]->getRadius()/(100*(cview+1))
+                
+                glEnable(GL_TEXTURE_2D);
+                glEnable(GL_TEXTURE_GEN_S);
+                glEnable(GL_TEXTURE_GEN_T);
                 glBindTexture(GL_TEXTURE_2D, texture[i]);
                 glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -149,12 +163,9 @@ void display(){
                 else
                     cout << "Failed to load texture" << endl;
                 stbi_image_free(data);
-                if(i!=0)
-                    pos = celestial[i]->getRadius()*2.1;
                 // gluLookAt(pos,0.0,-1.0,nmov,0.0,0.0,1.0,0.0,0.0);
                 // gluLookAt(pos,0.0,-1.0,pos,0.0,0.0,0.0,0.0,0.0);
                 celestial[i]->render(pos,0.0,0.0);
-                
             }
             glDisable(GL_TEXTURE_2D);
             break;
@@ -175,8 +186,15 @@ void display(){
         case 8:
             break;
         case 9:
+            bgr = bgb = bgg = 1.0;
             break;
         case 10:
+            for(i=0;i<4;i++)
+                lightam[i] = 0.1;
+            glLightfv(GL_LIGHT0,GL_POSITION,lightpos);
+            glLightfv(GL_LIGHT0,GL_AMBIENT,lightam);
+            glLightfv(GL_LIGHT0,GL_DIFFUSE,lightdif);
+            glEnable(GL_LIGHT0);
             break;
         case 11:
             break;
@@ -245,15 +263,11 @@ int main(int argc,char** argv){
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
     glutInitWindowSize(1000,1000);
     glutCreateWindow("Scale of the Universe");
+    createMenu();
     //glutFullScreen(); // don't enable this.
     glGenTextures(33,texture);
-    glLightfv(GL_LIGHT0,GL_POSITION,lightpos);
-    glLightfv(GL_LIGHT0,GL_AMBIENT,lightam);
-    glLightfv(GL_LIGHT0,GL_DIFFUSE,lightdif);
-    createMenu();
 	glutDisplayFunc(display);
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
     glutKeyboardFunc(myKeyboard);
     // glutIdleFunc(display);
 	glEnable(GL_DEPTH_TEST);
