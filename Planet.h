@@ -11,13 +11,15 @@ class Planet {
         string getName();
         string getFacts();
         string getDescription();
+        void setPosition(double);
+        double getPosition();
         void setSecondaryTextPrimitives(double,double,double);
         ~Planet();
     private:
         void loadTexture();
         string name,facts,description,units;
         string texLoc;
-        double radius;
+        double radius,position;
         double scaling_factor;
         GLuint texture[33];
 };

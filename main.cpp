@@ -7,6 +7,10 @@
 #include "stb/stb_image.h"
 #include "Planet.h"
 using namespace std;
+
+struct camera_pos {
+    double x,y,z,posx,posy,posz;
+} camera;
 // background colors
 double bgr = 0.0,bgg = 0.0,bgb = 0.0;
 static int window,menu_id,go_to_submenu_id,music_submenu_id,rotate_submenu_id,background_submenu_id,translate_submenu_id;
@@ -18,13 +22,14 @@ int cview = 0;
 GLfloat lightpos[] = {0.0,0.0,1.0,0.0};
 GLfloat lightam[] = {1.0,1.0,1.0,1.0};
 GLfloat lightdif[] = {1.0,1.0,1.0,1.0};
+
 // how much to move by when 'z' or 'x' key is pressed using glOrtho
-double nmov = -32,
-        fmov = 32,
-     topmov = -32,
-     botmov =  32,
-     leftmov= -32,
-     rightmov= 32;
+double nmov = -64,
+        fmov = 64,
+     topmov = -64,
+     botmov =  64,
+     leftmov= -64,
+     rightmov= 64;
 // a variable to decide distance between planets
 double pos=0.0,posy = 0.0;
 // how much to zoom out to display the new object
@@ -102,15 +107,11 @@ void createMenu(){
     glutAddMenuEntry("Callisto",3);
     glutAddMenuEntry("Mercury",4);
     glutAddMenuEntry("Mars",5);
-    rotate_submenu_id = glutCreateMenu(menu);
-    glutAddMenuEntry("Enable",11);
-    glutAddMenuEntry("Disable",12);
     menu_id = glutCreateMenu(menu);
     glutAddMenuEntry("Start",0);
     glutAddSubMenu("Go to...",go_to_submenu_id);
     glutAddMenuEntry("Background",9);
     glutAddMenuEntry("Lighting",10);
-    glutAddSubMenu("Rotation",rotate_submenu_id);
     glutAddMenuEntry("Quit",13);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
@@ -121,10 +122,11 @@ void universe_init(){
     glLightfv(GL_LIGHT0,GL_AMBIENT,lightam);
     glLightfv(GL_LIGHT0,GL_DIFFUSE,lightdif);
     glEnable(GL_LIGHT0);
-    glShadeModel(GL_SMOOTH);
+    glShadeModel(GL_SMOOTH); 
 }
 void display(){
     universe_init();
+    glColor3f(0.0,0.0,0.0);
     if(choice == -1)
         front();
     int i;
@@ -138,8 +140,9 @@ void display(){
             glLoadIdentity();
             printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
             glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
-            strokeString(pos-(cview+1)*5,botmov/2,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
-            strokeString(pos-(cview+1)*5,topmov/1.5,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
+            gluLookAt(1.0,0.0,0.0,0.0,0.0,-camera.posx,0.0,1.0,0.0);
+            strokeString(camera.posx-(cview*50),botmov/2,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
+            strokeString(camera.posx-(cview*50),topmov/1.5,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
             for(i=0;i<celes_count;i++){
                 if(i!=0) 
                     pos = celestial[i]->getRadius()*2.1;
@@ -165,6 +168,7 @@ void display(){
                 stbi_image_free(data);
                 // gluLookAt(pos,0.0,-1.0,nmov,0.0,0.0,1.0,0.0,0.0);
                 // gluLookAt(pos,0.0,-1.0,pos,0.0,0.0,0.0,0.0,0.0);
+                celestial[i]->setPosition(pos);
                 celestial[i]->render(pos,0.0,0.0);
             }
             glDisable(GL_TEXTURE_2D);
@@ -197,7 +201,6 @@ void display(){
             glEnable(GL_LIGHT0);
             break;
         case 11:
-            break;
         case 12:
             break;
     }
@@ -212,39 +215,46 @@ void reshape(int x, int y){
     glMatrixMode(GL_MODELVIEW);
     glViewport(0,0,x,y);  //Use the whole window for rendering
 }
-void updateScreen(){
-    glutPostRedisplay();
-}
 void myKeyboard(unsigned char key,int x,int y){
+    
     switch(key){
         case 'z':
             if(cview < celes_count-1)
                 cview++;
-            cout << celestial[cview]->getRadius() <<endl;
-            if(nmov < celestial[cview]->getRadius()){
-                nmov *= 2;
-                fmov *= 2;
-                topmov *= 2;
-                botmov *= 2;
-                leftmov *= 2;
-                rightmov *= 2;
-            }
-            glTranslated(celestial[cview]->getRadius(),0.0,0.0);
+            pos = 0;
+            camera.posx = celestial[cview-1]->getRadius()+celestial[cview]->getRadius()*2;
+            pos -= camera.posx;
+            camera.posy = pos;
             break;
         case 'x':
-            if(cview != 0)
+            if(cview >= 1)
                 cview--;
-            cout << celestial[cview]->getRadius() <<endl;
-            nmov /= 2;
-            fmov /= 2;
-            topmov /= 2;
-            botmov /= 2;
-            leftmov /= 2;
-            rightmov /= 2;
-            //glTranslated(rightmov,0.0,0.0);
+            pos = camera.posy;
+            if(cview-1 != 0){
+                camera.posx = celestial[cview]->getRadius()*2;
+                pos += camera.posx;
+            }
+            camera.posy = pos;
+            break;
+        case 'c':
+            pos = camera.posy;
+            nmov *= 1.52;
+            fmov *= 1.52;
+            topmov *= 1.52;
+            botmov *= 1.52;
+            leftmov *= 1.52;
+            rightmov *= 1.52;
+            break;
+        case 'v':
+            pos = camera.posy;
+            nmov /= 1.52;
+            fmov /= 1.52;
+            topmov /= 1.52;
+            botmov /= 1.52;
+            leftmov /= 1.52;
+            rightmov /= 1.52;
             break;
     }
-    pos = 0;
     glutPostRedisplay();
 }
 int main(int argc,char** argv){
@@ -264,12 +274,11 @@ int main(int argc,char** argv){
     glutInitWindowSize(1000,1000);
     glutCreateWindow("Scale of the Universe");
     createMenu();
-    //glutFullScreen(); // don't enable this.
+    // glutFullScreen(); // don't enable this.
     glGenTextures(33,texture);
 	glutDisplayFunc(display);
     glEnable(GL_LIGHTING);
     glutKeyboardFunc(myKeyboard);
-    // glutIdleFunc(display);
 	glEnable(GL_DEPTH_TEST);
     glutMainLoop();
 }

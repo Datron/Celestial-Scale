@@ -32,6 +32,12 @@ string Planet::getFacts(){
 string Planet::getTexLoc(){
     return "bmp/"+this->texLoc;
 }
+void Planet::setPosition(double pos){
+    this->position = position;
+}
+double Planet::getPosition(){
+    return this->position;
+}
 Planet::~Planet(){
     cout << this->name << "\t\t" << this-> radius << "\t\t" << this->units << "\t\t" << this->facts << "\t\t" << this->texLoc <<endl;
 }
