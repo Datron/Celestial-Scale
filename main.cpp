@@ -138,8 +138,8 @@ void display(){
             glLoadIdentity();
             printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
             glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
-            strokeString(pos-(cview+1)*5,botmov/3,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
-            strokeString(pos-(cview+1)*5,topmov/2,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
+            strokeString(pos-(cview+1)*5,botmov/2,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
+            strokeString(pos-(cview+1)*5,topmov/1.5,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
             for(i=0;i<celes_count;i++){
                 if(i!=0) 
                     pos = celestial[i]->getRadius()*2.1;
