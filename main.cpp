@@ -41,7 +41,14 @@ int rc;
 Planet* celestial[33];
 GLuint texture[33];
 int celes_count=0;
-
+// rotate parameter
+double theta = 0.0;
+int rotate = 0;
+void strokeString();
+void front();
+void rotation(int n);
+void display();
+void myKeyboard(unsigned char,int,int);
 // program starts here
 void strokeString(float x,float y,float sx,float sy,string string,int width){
     const char *c = string.c_str();
@@ -111,9 +118,19 @@ void createMenu(){
     glutAddMenuEntry("Start",0);
     glutAddSubMenu("Go to...",go_to_submenu_id);
     glutAddMenuEntry("Background",9);
-    glutAddMenuEntry("Lighting",10);
+    glutAddMenuEntry("Rotate",10);
+    glutAddMenuEntry("Animate",14);
     glutAddMenuEntry("Quit",13);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+void animate(int n){
+    myKeyboard('z',0,0);
+    myKeyboard('c',0,0);
+}
+void rotation(int n){
+    if(choice != -1)
+        myKeyboard('y',0,0);
+    glutTimerFunc(10,rotation,0);
 }
 void universe_init(){
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -127,8 +144,9 @@ void universe_init(){
 void display(){
     universe_init();
     glColor3f(0.0,0.0,0.0);
-    if(choice == -1)
+    if(choice == -1){
         front();
+    }
     int i;
     int w;
     int h;
@@ -140,7 +158,7 @@ void display(){
             glLoadIdentity();
             printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
             glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
-            gluLookAt(1.0,0.0,0.0,0.0,0.0,-camera.posx,0.0,1.0,0.0);
+            gluLookAt(1.0,0.0,0.0,0.0,0.0,-camera.posx+celestial[cview]->getRadius(),0.0,1.0,0.0);
             strokeString(camera.posx-(cview*50),botmov/2,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
             strokeString(camera.posx-(cview*50),topmov/1.5,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
             for(i=0;i<celes_count;i++){
@@ -166,12 +184,14 @@ void display(){
                 else
                     cout << "Failed to load texture" << endl;
                 stbi_image_free(data);
-                // gluLookAt(pos,0.0,-1.0,nmov,0.0,0.0,1.0,0.0,0.0);
-                // gluLookAt(pos,0.0,-1.0,pos,0.0,0.0,0.0,0.0,0.0);
+                // glPushMatrix();
+                glRotated(theta,0.0,1.0,0.0);
                 celestial[i]->setPosition(pos);
                 celestial[i]->render(pos,0.0,0.0);
+                // glPopMatrix();
             }
             glDisable(GL_TEXTURE_2D);
+            
             break;
         case 1:
             break;
@@ -193,12 +213,15 @@ void display(){
             bgr = bgb = bgg = 1.0;
             break;
         case 10:
-            for(i=0;i<4;i++)
-                lightam[i] = 0.1;
-            glLightfv(GL_LIGHT0,GL_POSITION,lightpos);
-            glLightfv(GL_LIGHT0,GL_AMBIENT,lightam);
-            glLightfv(GL_LIGHT0,GL_DIFFUSE,lightdif);
-            glEnable(GL_LIGHT0);
+            if(rotate == 1){
+                rotate = 0;
+                glutTimerFunc(100,nullptr,0);
+            }
+            else {
+                rotate = 1;
+                glutTimerFunc(10,rotation,0);
+            }
+            choice = 0;
             break;
         case 11:
         case 12:
@@ -245,6 +268,20 @@ void myKeyboard(unsigned char key,int x,int y){
             leftmov *= 1.52;
             rightmov *= 1.52;
             break;
+        case 'y':
+            pos = 0;
+            nmov *= 1;
+            fmov *= 1;
+            topmov *= 1;
+            botmov *= 1;
+            leftmov *= 1;
+            rightmov *= 1;
+            if(rotate)
+                theta += 2;
+            if(theta > 360)
+                theta = 0.0;
+            cout << "in Timer:" << theta << endl;
+            break;
         case 'v':
             pos = camera.posy;
             nmov /= 1.52;
@@ -256,6 +293,9 @@ void myKeyboard(unsigned char key,int x,int y){
             break;
     }
     glutPostRedisplay();
+}
+void myReshape(int w,int h){
+    glViewport(0,0,w,h);
 }
 int main(int argc,char** argv){
     rc = sqlite3_open("planets.db",&db);
@@ -274,11 +314,12 @@ int main(int argc,char** argv){
     glutInitWindowSize(1000,1000);
     glutCreateWindow("Scale of the Universe");
     createMenu();
-    // glutFullScreen(); // don't enable this.
     glGenTextures(33,texture);
 	glutDisplayFunc(display);
+    glutTimerFunc(10,rotation,0);
     glEnable(GL_LIGHTING);
     glutKeyboardFunc(myKeyboard);
+    glutReshapeFunc(myReshape);
 	glEnable(GL_DEPTH_TEST);
     glutMainLoop();
 }
