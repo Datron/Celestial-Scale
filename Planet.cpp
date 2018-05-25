@@ -40,6 +40,7 @@ void Planet::setPosition(double pos){
     this->position = position;
 }
 double Planet::getPosition(){
+    cout << "My position " << this->position <<endl;
     return this->position;
 }
 Planet::~Planet(){

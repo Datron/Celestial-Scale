@@ -44,11 +44,16 @@ int celes_count=0;
 // rotate parameter
 double theta = 0.0;
 int rotate = 0;
+// function prototypes
 void strokeString();
 void front();
 void rotation(int n);
 void display();
 void myKeyboard(unsigned char,int,int);
+void animate(int n);
+double findPlanetPos(int c);
+void menu(int num);
+void universe_init();
 // program starts here
 void strokeString(float x,float y,float sx,float sy,string string,int width){
     const char *c = string.c_str();
@@ -92,11 +97,12 @@ static int callback(void *data,int argc,char** argv,char** azColName){
             // cout << argv[i+6] << endl;
             celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/100,argv[i+2],"|","|",argv[i+6]);
     }
+    cout << "Planets rendered " << celes_count <<endl;
     return 0;
 }
 void menu(int num){
     int i;
-    if(num == 13){
+    if(num == 27){
         glutDestroyWindow(window);
         sqlite3_close(db);
         for(i=0;i<celes_count;i++)
@@ -108,29 +114,34 @@ void menu(int num){
     glutPostRedisplay();
 }
 void createMenu(){
+    int i;
     go_to_submenu_id = glutCreateMenu(menu);
-    glutAddMenuEntry("Ceres",1);
-    glutAddMenuEntry("Moon",2);
-    glutAddMenuEntry("Callisto",3);
-    glutAddMenuEntry("Mercury",4);
-    glutAddMenuEntry("Mars",5);
+    for(i=0;i<celes_count;i++)
+        glutAddMenuEntry((celestial[i]->getName()).c_str(),i+1);
     menu_id = glutCreateMenu(menu);
     glutAddMenuEntry("Start",0);
     glutAddSubMenu("Go to...",go_to_submenu_id);
-    glutAddMenuEntry("Background",9);
-    glutAddMenuEntry("Rotate",10);
-    glutAddMenuEntry("Animate",14);
-    glutAddMenuEntry("Quit",13);
+    glutAddMenuEntry("Background",24);
+    glutAddMenuEntry("Rotate",25);
+    glutAddMenuEntry("Animate",26);
+    glutAddMenuEntry("Quit",27);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+double findPlanetPos(int c){
+    cout << "Finding Planet "+celestial[c]->getName() << celestial[c]->getPosition()<< endl;
+    choice = 0; 
+    return celestial[c]->getPosition();
 }
 void animate(int n){
     myKeyboard('z',0,0);
     myKeyboard('c',0,0);
+    if(cview < 24)
+        glutTimerFunc(1,animate,0);
 }
 void rotation(int n){
     if(choice != -1)
         myKeyboard('y',0,0);
-    glutTimerFunc(10,rotation,0);
+    glutTimerFunc(1,rotation,0);
 }
 void universe_init(){
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -158,14 +169,13 @@ void display(){
             glLoadIdentity();
             printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
             glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
-            gluLookAt(1.0,0.0,0.0,0.0,0.0,-camera.posx+celestial[cview]->getRadius(),0.0,1.0,0.0);
+            gluLookAt(1.0,0.0,0.0,0.0,0.0,-camera.posx,0.0,1.0,0.0);
             strokeString(camera.posx-(cview*50),botmov/2,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
-            strokeString(camera.posx-(cview*50),topmov/1.5,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
+            strokeString(camera.posx-(cview*100),topmov/1.5,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
             for(i=0;i<celes_count;i++){
                 if(i!=0) 
                     pos = celestial[i]->getRadius()*2.1;
                     // celestial[i]->getRadius()/(100*(cview+1))
-                
                 glEnable(GL_TEXTURE_2D);
                 glEnable(GL_TEXTURE_GEN_S);
                 glEnable(GL_TEXTURE_GEN_T);
@@ -184,35 +194,47 @@ void display(){
                 else
                     cout << "Failed to load texture" << endl;
                 stbi_image_free(data);
-                // glPushMatrix();
+                glPushMatrix();
                 glRotated(theta,0.0,1.0,0.0);
                 celestial[i]->setPosition(pos);
                 celestial[i]->render(pos,0.0,0.0);
-                // glPopMatrix();
+                glPopMatrix();
+                glTranslated(pos+2,0.0,0.0);
             }
             glDisable(GL_TEXTURE_2D);
             
             break;
         case 1:
-            break;
         case 2:
-            break;
         case 3:
-            break;
         case 4:
-            break;
         case 5:
-            break;
         case 6:
-            break;
         case 7:
-            break;
         case 8:
-            break;
         case 9:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 21:
+        case 22:
+        case 23:
+            pos = camera.posy;
+            camera.posx = findPlanetPos(choice-1);
+            cout << "camera.posx value " << camera.posx <<endl;
+            glutPostRedisplay();
+            break;
+        case 24:
             bgr = bgb = bgg = 1.0;
             break;
-        case 10:
+        case 25:
             if(rotate == 1){
                 rotate = 0;
                 glutTimerFunc(100,nullptr,0);
@@ -223,8 +245,8 @@ void display(){
             }
             choice = 0;
             break;
-        case 11:
-        case 12:
+        case 26:
+            glutTimerFunc(100,animate,0);
             break;
     }
     glutSwapBuffers();
@@ -232,11 +254,9 @@ void display(){
 }
 void reshape(int x, int y){
     if (y == 0 || x == 0) return;   
-    glMatrixMode(GL_PROJECTION);  
-    glLoadIdentity(); 
-    gluPerspective(39.0,(GLdouble)x/(GLdouble)y,0.6,21.0);
     glMatrixMode(GL_MODELVIEW);
-    glViewport(0,0,x,y);  //Use the whole window for rendering
+    glViewport(0,0,x,x);
+    glTranslated(0,-x,0);  
 }
 void myKeyboard(unsigned char key,int x,int y){
     
@@ -294,9 +314,6 @@ void myKeyboard(unsigned char key,int x,int y){
     }
     glutPostRedisplay();
 }
-void myReshape(int w,int h){
-    glViewport(0,0,w,h);
-}
 int main(int argc,char** argv){
     rc = sqlite3_open("planets.db",&db);
     if(rc){
@@ -316,10 +333,10 @@ int main(int argc,char** argv){
     createMenu();
     glGenTextures(33,texture);
 	glutDisplayFunc(display);
-    glutTimerFunc(10,rotation,0);
+    //glutTimerFunc(10,rotation,0);
     glEnable(GL_LIGHTING);
     glutKeyboardFunc(myKeyboard);
-    glutReshapeFunc(myReshape);
+    glutReshapeFunc(reshape);
 	glEnable(GL_DEPTH_TEST);
     glutMainLoop();
 }
