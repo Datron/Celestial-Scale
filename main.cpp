@@ -133,10 +133,12 @@ double findPlanetPos(int c){
     return celestial[c]->getPosition();
 }
 void animate(int n){
+    cout << "in animate" << endl;
     myKeyboard('z',0,0);
-    myKeyboard('c',0,0);
+    if(cview % 2 == 0)
+        myKeyboard('c',0,0);
     if(cview < 24)
-        glutTimerFunc(1,animate,0);
+        glutTimerFunc(1000,animate,0);
 }
 void rotation(int n){
     if(choice != -1)
@@ -247,8 +249,10 @@ void display(){
             break;
         case 26:
             glutTimerFunc(100,animate,0);
+            choice = 0;
             break;
     }
+    pos = camera.posy;
     glutSwapBuffers();
     glFlush();
 }
