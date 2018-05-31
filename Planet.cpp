@@ -12,13 +12,13 @@ Planet::Planet(string name,double radius,string units,string facts,string descri
     this->facts = facts; this->description = description; this->texLoc = texLoc;
 }
 void Planet::render(double x,double y,double z){
-    GLfloat diffusecoef[] = {1.0,1.0,1.0,1.0};
-    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,diffusecoef);
-
-    glBegin(GL_LINES);
-    glVertex2f(0,0);
-    glVertex2f(x+2,y);
-    glEnd();
+    glPushMatrix();
+            glColor3f(1.0,1.0,1.0);
+            glBegin(GL_LINES);
+            glVertex2f(0,0);
+            glVertex2f(x+2,0);
+            glEnd();
+    glPopMatrix();
     glTranslated(x+2,this->radius,z);
     //glTranslated(0.0,this->position,0.0);
     glutSolidSphere(this->radius,80,80);
@@ -42,7 +42,7 @@ string Planet::getTexLoc(){
     return "bmp/"+this->texLoc;
 }
 void Planet::setPosition(double pos){
-    this->position = position;
+    this->position = pos;
 }
 double Planet::getPosition(){
     cout << "My position " << this->position <<endl;

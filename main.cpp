@@ -19,9 +19,9 @@ int choice=-1;
 // variable that manages the current planet being viewed
 int cview = 0;
 // lighting parameters
-GLfloat lightpos[] = {0.0,0.0,1.0,0.0};
+GLfloat lightpos[] = {10.0,0.0,10.0,0.0};
 GLfloat lightam[] = {1.0,1.0,1.0,1.0};
-GLfloat lightdif[] = {1.0,1.0,1.0,1.0};
+GLfloat lightdif[] = {10.0,10.0,10.0,1.0};
 
 // how much to move by when 'z' or 'x' key is pressed using glOrtho
 double nmov = -64,
@@ -44,6 +44,8 @@ int celes_count=0;
 // rotate parameter
 double theta = 0.0;
 int rotate = 0;
+// animate flag
+int animatef = 0;
 // function prototypes
 void strokeString();
 void front();
@@ -97,7 +99,6 @@ static int callback(void *data,int argc,char** argv,char** azColName){
             // cout << argv[i+6] << endl;
             celestial[celes_count++] =new Planet(argv[i],atof(argv[i+1])/100,argv[i+2],"|","|",argv[i+6]);
     }
-    cout << "Planets rendered " << celes_count <<endl;
     return 0;
 }
 void menu(int num){
@@ -133,9 +134,9 @@ double findPlanetPos(int c){
     return celestial[c]->getPosition();
 }
 void animate(int n){
-    cout << "in animate" << endl;
-    myKeyboard('z',0,0);
-    if(cview % 2 == 0)
+    animatef = 1;
+    myKeyboard('c',0,0);
+    if(cview > 9)
         myKeyboard('c',0,0);
     if(cview < 24)
         glutTimerFunc(1000,animate,0);
@@ -147,12 +148,11 @@ void rotation(int n){
 }
 void universe_init(){
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glClearColor(bgr,bgg,bgb,1.0);
+    glClearColor(bgr,bgg,bgb,1.0); 
     glLightfv(GL_LIGHT0,GL_POSITION,lightpos);
     glLightfv(GL_LIGHT0,GL_AMBIENT,lightam);
     glLightfv(GL_LIGHT0,GL_DIFFUSE,lightdif);
     glEnable(GL_LIGHT0);
-    glShadeModel(GL_SMOOTH); 
 }
 void display(){
     universe_init();
@@ -171,13 +171,18 @@ void display(){
             glLoadIdentity();
             printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
             glOrtho(nmov,fmov,topmov,botmov,leftmov,rightmov);
-            gluLookAt(1.0,0.0,0.0,0.0,0.0,-camera.posx,0.0,1.0,0.0);
-            strokeString(camera.posx-(cview*50),botmov/2,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
-            strokeString(camera.posx-(cview*100),topmov/1.5,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
+            gluLookAt(1.0,1.0,0.0,0.0,0.0,-camera.posx,0.0,1.0,0.0);
+            strokeString(leftmov+rightmov,botmov/2,fmov/1600,fmov/1600,celestial[cview]->getName(),2);
+            strokeString(leftmov+rightmov,topmov/1.5,fmov/1600,fmov/1600,celestial[cview]->getFacts(),2);
             for(i=0;i<celes_count;i++){
                 if(i!=0) 
                     pos = celestial[i]->getRadius()*2.1;
-                    // celestial[i]->getRadius()/(100*(cview+1))
+                GLfloat diffusecoef[] = {1.0,1.0,1.0,1.0};
+                GLfloat shiny[] = {50.0};
+                glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,diffusecoef);
+                glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,diffusecoef);
+                glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+                glShadeModel(GL_SMOOTH);
                 glEnable(GL_TEXTURE_2D);
                 glEnable(GL_TEXTURE_GEN_S);
                 glEnable(GL_TEXTURE_GEN_T);
@@ -228,9 +233,9 @@ void display(){
         case 21:
         case 22:
         case 23:
-            pos = camera.posy;
-            camera.posx = findPlanetPos(choice-1);
-            cout << "camera.posx value " << camera.posx <<endl;
+            camera.posy = -(findPlanetPos(choice-1));
+            cout << "camera.posx value " << camera.posy <<endl;
+            choice = 0;
             glutPostRedisplay();
             break;
         case 24:
@@ -239,7 +244,7 @@ void display(){
         case 25:
             if(rotate == 1){
                 rotate = 0;
-                glutTimerFunc(100,nullptr,0);
+                theta = 0.0;
             }
             else {
                 rotate = 1;
@@ -248,7 +253,11 @@ void display(){
             choice = 0;
             break;
         case 26:
-            glutTimerFunc(100,animate,0);
+            if(animatef){
+                animatef = 0;
+            }
+            else
+                glutTimerFunc(100,animate,0);
             choice = 0;
             break;
     }
@@ -257,10 +266,12 @@ void display(){
     glFlush();
 }
 void reshape(int x, int y){
-    if (y == 0 || x == 0) return;   
+    if (y == 0 || x == 0) return;
+    cout << "Reshape called" << endl;
+    glMatrixMode(GL_PROJECTION);
+    glViewport(0,0,1000,1000);
     glMatrixMode(GL_MODELVIEW);
-    glViewport(0,0,x,x);
-    glTranslated(0,-x,0);  
+    glutPostRedisplay();
 }
 void myKeyboard(unsigned char key,int x,int y){
     
@@ -284,6 +295,10 @@ void myKeyboard(unsigned char key,int x,int y){
             camera.posy = pos;
             break;
         case 'c':
+            if(animatef == 1){
+                if(cview < celes_count - 1)
+                    cview++;
+            }
             pos = camera.posy;
             nmov *= 1.52;
             fmov *= 1.52;
@@ -301,7 +316,7 @@ void myKeyboard(unsigned char key,int x,int y){
             leftmov *= 1;
             rightmov *= 1;
             if(rotate)
-                theta += 2;
+                theta += 7;
             if(theta > 360)
                 theta = 0.0;
             cout << "in Timer:" << theta << endl;
