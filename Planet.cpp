@@ -13,7 +13,6 @@ Planet::Planet(string name,double radius,string units,string facts,string descri
 }
 void Planet::render(double x,double y,double z){
     glPushMatrix();
-            glColor3f(1.0,1.0,1.0);
             glBegin(GL_LINES);
             glVertex2f(0,0);
             glVertex2f(x+2,0);

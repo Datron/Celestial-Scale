@@ -166,7 +166,6 @@ void display(){
     int comp;
     switch(choice){
         case 0:
-            // glColor3f(1.0,0.0,0.0);
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
             printf("cview = %d pos = %f %f %f %f %f %f %f\n\n",cview,pos,nmov,fmov,topmov,botmov,leftmov,rightmov);
@@ -207,9 +206,8 @@ void display(){
                 celestial[i]->render(pos,0.0,0.0);
                 glPopMatrix();
                 glTranslated(pos+2,0.0,0.0);
+                glDisable(GL_TEXTURE_2D);
             }
-            glDisable(GL_TEXTURE_2D);
-            
             break;
         case 1:
         case 2:
