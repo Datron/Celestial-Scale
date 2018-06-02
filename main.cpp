@@ -36,7 +36,7 @@ double pos=0.0,posy = 0.0;
 int zoom;
 // db variables
 sqlite3 *db;
-char *error = nullptr;
+char *error;
 int rc;
 Planet* celestial[33];
 GLuint texture[33];
@@ -204,6 +204,9 @@ void display(){
                 glRotated(theta,0.0,1.0,0.0);
                 celestial[i]->setPosition(pos);
                 celestial[i]->render(pos,0.0,0.0);
+                if(celestial[i]->getName().compare("Saturn") == 0){
+                    celestial[i]->renderRing(pos,celestial[i]->getRadius());
+                }
                 glPopMatrix();
                 glTranslated(pos+2,0.0,0.0);
                 glDisable(GL_TEXTURE_2D);

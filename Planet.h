@@ -5,6 +5,7 @@ class Planet {
         Planet();
         Planet(string name,double radius,string units,string facts,string description,string texLoc);
         void render(double,double,double);
+        void renderRing(double,double);
         double getRadius();
         string getUnit();
         string getTexLoc();

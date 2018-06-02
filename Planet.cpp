@@ -22,6 +22,13 @@ void Planet::render(double x,double y,double z){
     //glTranslated(0.0,this->position,0.0);
     glutSolidSphere(this->radius,80,80);
 }
+void Planet::renderRing(double pos,double radius){
+    int i;
+    glRotated(90.0,0.0,1.0,0.0);
+    glRotated(-130.0,0.0,1.0,1.0);
+    for(i=0;i<10;i++)
+        glutSolidTorus(30,radius+i*100,80,100);
+}
 double Planet::getRadius(){
     return this->radius;
 }
