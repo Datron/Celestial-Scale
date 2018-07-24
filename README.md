@@ -8,8 +8,6 @@
 
 # Screenshots
 
-![intro](intro.png)
-
 ![intro](first.png)
 
 ![intro](second.png)
